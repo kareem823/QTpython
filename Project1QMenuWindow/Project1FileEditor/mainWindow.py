@@ -2,6 +2,9 @@ from PySide6.QtWidgets import *
 
 from PySide6.QtCore import *
 from PySide6.QtGui import *
+
+from GuiTools import *
+
 import sys
 import os
 
@@ -23,7 +26,39 @@ class MainWindow(QMainWindow):
 
         self.createMenuBar()
         self.createToolBar()
+
         self.showWelcomeScreen()
+
+        self.boldAction = QAction("Bold", self)
+        self.boldAction.setShortcut(QKeySequence("Ctrl+b"))
+        self.boldAction.triggered.connect(self.bold_text)
+        self.toolBar.addAction(self.boldAction)
+
+        self.guitool = GuiTools(app)
+        self.boldAction.triggered.connect(self.guitool.toolBarMessages)
+
+
+    def bold_text(self):
+        cursor = self.textWidget.textCursor()
+        if cursor.hasSelection():
+            # Get the current format of the selected text
+            currentFormat = cursor.charFormat()
+            
+            # Check if the text is already bold
+            isBold = currentFormat.fontWeight() == QFont.Bold
+            
+            # Toggle bold state
+            newWeight = QFont.Normal if isBold else QFont.Bold
+            currentFormat.setFontWeight(newWeight)
+            
+            # Apply the new format to the selected text
+            cursor.mergeCharFormat(currentFormat)
+        else:
+            # If no text is selected, toggle the bold state at the cursor position
+            currentCharFormat = self.textWidget.currentCharFormat()
+            isBold = currentCharFormat.fontWeight() == QFont.Bold
+            currentCharFormat.setFontWeight(QFont.Normal if isBold else QFont.Bold)
+            self.textWidget.setCurrentCharFormat(currentCharFormat)
 
     def showWelcomeScreen(self):
         """Display the welcome screen with an 'Open File' button."""
@@ -54,6 +89,7 @@ class MainWindow(QMainWindow):
         self.containerWidget.setLayout(self.containerLayout)
         self.setCentralWidget(self.containerWidget)
 
+
     def openFile(self):
         """Open an existing file and display its content."""
         options = QFileDialog.Options()
@@ -78,10 +114,14 @@ class MainWindow(QMainWindow):
         self.menu: QMenuBar = self.menuBar()
         self.fileMenu: QMenu = self.menu.addMenu("File")
         self.editMenu: QMenu = self.menu.addMenu("Edit")
-        self.viewMenu: QMenu = self.menu.addMenu("View")
 
         self.addFileMenuItems()
         self.addEditMenuItems()
+
+        aboutAction = QAction("About", self)
+        aboutAction.triggered.connect(GuiTools.showFAQMessageBox)
+        self.menu.addAction(aboutAction)
+
 
     def createToolBar(self):
         """Create a toolbar with redo functionality."""
@@ -119,6 +159,7 @@ class MainWindow(QMainWindow):
         self.saveAs: QAction = self.fileMenu.addAction("Save As")
         self.fileMenu.addSeparator()
         self.exitItem: QAction = self.fileMenu.addAction("Exit")
+        
 
         # Connect menu items to their respective methods
         self.newItem.triggered.connect(self.makeTextWidget)

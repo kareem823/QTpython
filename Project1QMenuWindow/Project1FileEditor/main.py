@@ -8,6 +8,9 @@ app = QApplication(sys.argv)
 
 window = MainWindow(app)
 
+GuiTool = GuiTools(app)
+
+
 window.show()
 
 # This line starts the application's main event loop. This is what makes the GUI

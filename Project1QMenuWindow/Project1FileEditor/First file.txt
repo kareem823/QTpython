@@ -1,1 +1,3 @@
-First file
+First file trying to bold something
+
+* I am trying to make the FAQ
