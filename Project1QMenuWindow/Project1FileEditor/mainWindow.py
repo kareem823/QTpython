@@ -38,6 +38,25 @@ class MainWindow(QMainWindow):
         self.boldAction.triggered.connect(self.guitool.toolBarMessages)
 
 
+    #make a function to convert the contents in my text widget to html format
+    def convertToHtml(self):
+        #get the current text cursor
+        cursor = self.textWidget.textCursor()
+        #get the selected text
+        selectedText = cursor.selectedText()
+        #if there is selected text, convert that to html
+        if selectedText:
+            html = f"<html><body><p>{selectedText}</p></body></html>"
+            #insert the html into the text widget at the current position
+            cursor.insertHtml(html)
+        else:
+            #get the entire text from the widget
+            text = self.textWidget.toPlainText()
+            #convert it to html
+            html = f"<html><body><p>{text}</p></body></html>"
+            #set the text of the widget to html
+            self.textWidget.setHtml(html)
+
     def bold_text(self):
         cursor = self.textWidget.textCursor()
         if cursor.hasSelection():
@@ -131,7 +150,7 @@ class MainWindow(QMainWindow):
 
         # Create the redo action
         self.redoAction = QAction("↷ Redo", self)
-        self.redoAction.setShortcut("Ctrl+Shift+Z")  # Common redo shortcut
+        self.redoAction.setShortcut("Ctrl+R")  # Common redo shortcut
         self.redoAction.triggered.connect(self.textWidget.redo)
         self.redoAction.setEnabled(False)  # Initially disabled
 
@@ -149,6 +168,19 @@ class MainWindow(QMainWindow):
 
         self.toolBar.addAction(self.undoAction)
         self.textWidget.undoAvailable.connect(self.undoAction.setEnabled)
+
+        #create a QAction button to convert text to html
+        self.htmlAction = QAction("To HTML", self)
+        self.htmlAction.triggered.connect(self.convertToHtml)
+        self.toolBar.addAction(self.htmlAction)
+
+        #create a QToolButton to insert an image into the text file
+        self.imageButton = QToolButton()
+        self.imageButton.setText("Insert Image")
+        self.imageButton.clicked.connect(self.imageInFile)
+        self.toolBar.addWidget(self.imageButton)
+
+
 
     def addFileMenuItems(self) -> None:
         """Add items to the File menu."""
@@ -240,3 +272,28 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(f"{fileName} - Text Editor")
         else:
             self.setWindowTitle("Untitled - Text Editor")
+
+
+    def imageInFile(self) -> None:
+        # I want to make a file dialog so the user can select an image
+        imageFileDialog = QFileDialog()
+        imageFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        imageFileDialog.setNameFilter("Image Files (*.png *.jpg *.jpeg)")
+        imageFileDialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+        imageFileDialog.setWindowTitle("Select an Image")
+        imageFileDialog.exec_()
+        # I want to get the selected image path
+        selectedImagePath = imageFileDialog.selectedFiles()
+        # I want to open the selected image and read it into the text file
+        if selectedImagePath:
+            # Create an HTML string to display the image
+            html = f"<img src='{selectedImagePath[0]}' width='80%' height='80%'>"
+            # Insert the HTML string into the text widget
+            self.textWidget.setHtml(html)
+
+            
+
+
+        
+
+

@@ -35,6 +35,3 @@ class GuiTools(QMainWindow):
         #if the user clicks Okay then exit the modal and print a message
         elif showMessage == QMessageBox.Ok:
             print("User confirmed App FAQ")
-        
-
-
