@@ -4,9 +4,11 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 
 from GuiTools import *
+from UserInputMethods import *
 
 import sys
 import os
+from docx import Document
 
 class MainWindow(QMainWindow):
     def __init__(self, app):
@@ -177,8 +179,14 @@ class MainWindow(QMainWindow):
         #create a QToolButton to insert an image into the text file
         self.imageButton = QToolButton()
         self.imageButton.setText("Insert Image")
-        self.imageButton.clicked.connect(self.imageInFile)
+        self.imageButton.clicked.connect(lambda: GuiTools.imageInFile(self, self.textWidget))
         self.toolBar.addWidget(self.imageButton)
+
+        #user the change font size method from the userinput class
+        self.sizeSelector = UserInputMethods.FontSizeSelector(self, self.toolBar,self.textWidget, 11)
+
+        #user the change font style method from the userinput class
+        self.selectFont = UserInputMethods.FontStyleSelector(self, self.toolBar, self.textWidget)
 
 
 
@@ -240,6 +248,7 @@ class MainWindow(QMainWindow):
         else:
             self.writeToFile(self.currentFilePath)
 
+
     def saveFileAs(self) -> None:
         """Save the current content to a new file."""
         if not self.textWidget.toPlainText():
@@ -248,7 +257,7 @@ class MainWindow(QMainWindow):
 
         options = QFileDialog.Options()
         filePath, _ = QFileDialog.getSaveFileName(
-            self, "Save As", "", "Text Files (*.txt);;All Files (*)", options=options
+            self, "Save As", "", "Text Files (*.txt);; Word Documents (*.docx) ;; All Files (*)", options=options
         )
         if filePath:
             self.currentFilePath = filePath
@@ -260,7 +269,6 @@ class MainWindow(QMainWindow):
             content = self.textWidget.toPlainText()
             with open(filePath, 'w', encoding='utf-8') as file:
                 file.write(content)
-            QMessageBox.information(self, "Success", f"File saved to {filePath}")
             self.updateWindowTitle()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Could not save file: {e}")
@@ -272,28 +280,3 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(f"{fileName} - Text Editor")
         else:
             self.setWindowTitle("Untitled - Text Editor")
-
-
-    def imageInFile(self) -> None:
-        # I want to make a file dialog so the user can select an image
-        imageFileDialog = QFileDialog()
-        imageFileDialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        imageFileDialog.setNameFilter("Image Files (*.png *.jpg *.jpeg)")
-        imageFileDialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
-        imageFileDialog.setWindowTitle("Select an Image")
-        imageFileDialog.exec_()
-        # I want to get the selected image path
-        selectedImagePath = imageFileDialog.selectedFiles()
-        # I want to open the selected image and read it into the text file
-        if selectedImagePath:
-            # Create an HTML string to display the image
-            html = f"<img src='{selectedImagePath[0]}' width='80%' height='80%'>"
-            # Insert the HTML string into the text widget
-            self.textWidget.setHtml(html)
-
-            
-
-
-        
-
-
